@@ -1,0 +1,255 @@
+好吧，我也贴上我的，很简单的一个vimrc： 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+" 
+" 
+" Last Change:2010-03-17 10:30 
+" 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+"set path=.,e:\htdocs\royal\**,, 
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+" Generel 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+"取消vi兼容模式 
+set nocompatible 
+
+"设置冒号命令和搜索命令的历史记录长度 
+set history=200 
+
+"回显输入的命令 
+set showcmd 
+
+"显示当前的模式 
+set showmode 
+
+"不显示工具栏 
+set guioptions-=T 
+
+"在所有模式下都启用鼠标 
+set mouse=a 
+
+"解除Backspace的限制 
+set backspace=start,indent,eol 
+
+"使关联系统的剪贴板 
+set clipboard+=unnamed 
+
+"总是显示当前光标位置 
+set ruler 
+
+"显示行号 
+set number 
+
+"行高亮 
+set cursorline 
+
+"vim内部使用的编码方式 
+set encoding=utf-8 
+
+"vim中当前文件的字符编码方式 
+set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,latin1 
+
+"防止界面乱码（中文情况下） 
+set langmenu=zh_cn.utf-8 
+language message zh_cn.utf-8 
+
+"状态栏显示设置 
+set laststatus=2 
+set statusline= 
+set statusline+=%2*%-3.3n%0*\ 
+set statusline+=%f\ 
+set statusline+=%h%1*%m%r%w%0* 
+set statusline+=[ 
+if v:version >= 600 
+set statusline+=%{strlen(&ft)?&ft:'none'}, 
+set statusline+=%{&encoding}, 
+endif 
+set statusline+=%{&fileformat}] 
+if filereadable(expand("$VIM/vimfiles/plugin/vimbuddy.vim")) 
+set statusline+=\ %{VimBuddy()} 
+endif 
+set statusline+=%= 
+set statusline+=0x%-8B\ 
+set statusline+=%-14.(%l,%c%V%)\ %<%P 
+
+"关闭备份,不产生swp文件 
+set nobackup 
+set nowb 
+
+"设定文件浏览器目录为当前目录 
+set bsdir=buffer 
+
+"配色方案 
+color sea 
+set background=dark 
+
+"字体设置(含双字节字符字体，黑体) 
+set guifont=Bitstream\ Vera\ Sans\ Mono:h10 
+set guifontwide=Microsoft\ Yahei:h9 
+
+""""""""""""""""""""""""""""""""""""""""""""""""""" 
+" Programming 
+""""""""""""""""""""""""""""""""""""""""""""""""""" 
+"开启文件检测 
+filetype plugin indent on 
+
+"语法高亮 
+syntax on 
+
+"智能对齐方式 
+set smartindent 
+
+"tab占4个字符 
+set tabstop=4 
+
+"按一次tab前进4个字符 
+set softtabstop=4 
+
+"用空格替代tab 
+set expandtab 
+
+"自动缩进 
+set ai! 
+
+"缩进的字符个数 
+set cindent shiftwidth=4 
+
+"即时搜索及反白显示第一个匹配 
+set incsearch 
+
+"高亮搜索 
+set hlsearch 
+
+"循环搜索 
+set wrapscan 
+
+"搜索时忽略大小写 
+set ignorecase 
+
+"输入括号时短暂跳到与之相匹配之处 
+set showmatch 
+
+"匹配括号的规则，增加针对html的<> 
+set matchpairs=(:),{:},[:],<:> 
+
+"让退格、空格、上下箭头遇到行首行尾时自动移到下一行 
+set whichwrap =b,s,<,>,[,] 
+
+"设置粘贴模式 
+set paste 
+
+"折叠设置 
+set foldmethod=marker 
+set foldlevel=3 
+set foldcolumn=4 
+
+"保存文件格式的顺序...放在后面比较有效果 
+set fileformats=unix,dos 
+
+""""""""""""""""""""""""""""""""""""""""""""""""""" 
+" 插件、函数、键映射等 
+""""""""""""""""""""""""""""""""""""""""""""""""""" 
+" php 
+" 高亮字符串里的SQL语句 
+let php_sql_query=1 
+" 高亮字符串里的HTML 
+let php_htmlInStrings=1 
+" 禁用php的短标记 
+let php_noShortTags=1 
+" 启用代码折叠（用于类和函数、自动） 
+let php_folding=0 
+
+"F2(及保存时)处理行尾的空格以及多余空行,F2同时能清除高亮 
+autocmd BufRead,BufWrite * if ! &bin | silent! %s/\s\+$//ge | endif 
+map <F2> :w<CR>:call CleanupBuffer(1)<CR>:noh<CR> 
+
+function! CleanupBuffer(keep) 
+if (&bin > 0) 
+return 
+endif 
+silent! %s/\s\+$//ge 
+let lnum = line(".") 
+let lastline = line("$") 
+let n = lastline 
+while (1) 
+let line = getline(n) 
+if (!empty(line)) 
+break 
+endif 
+let n = n - 1 
+endwhile 
+let start = n+1+a:keep 
+if (start < lastline) 
+execute n+1+a:keep . "," . lastline . "d" 
+endif 
+exec "normal " . lnum . "G" 
+endfunction 
+
+"netrw设置 
+let g:netrw_winsize=30 
+let g:netrw_liststyle=1 
+let g:netrw_timefmt='%Y-%m-%d %H:%M:%S' 
+nmap <silent> <C-F7> :Sexplore!<cr> 
+
+"F6打开或关闭nerd_tree和taglist 
+"由于nerd_tree和taglist采用了trinity插件打开 
+"所以具体的设置以trinity.vim为准 
+nmap <F6> :TrinityToggleTagListAndNERDTree<CR> 
+
+"F7单独切换打开nerd_tree（nerd_tree插件） 
+let g:NERDChristmasTree = 1 "色彩显示 
+let g:NERDTreeShowHidden = 1 "显示隐藏文件 
+let g:NERDTreeWinPos = 'left' "窗口显示位置 
+let g:NERDTreeHighlightCursorline = 0 "高亮当前行 
+nmap <F7> :TrinityToggleNERDTree<CR> "始终在右边显示 
+
+"taglist 
+let Tlist_Ctags_Cmd= $VIMRUNTIME .'\ctags' 
+let Tlist_Show_One_File=1 
+let Tlist_Exit_OnlyWindow=1 
+let Tlist_File_Fold_Auto_Close=1 
+let Tlist_Use_Right_Window=1 
+let Tlist_Enable_Fold_Column=1 
+let tlist_php_settings='php;c:class;d:constant;f:function' 
+nmap <F8> :TrinityToggleTagList<CR> 
+
+
+"F12生成/更新tags文件 
+set tags=tags 
+set autochdir 
+function! UpdateTagsFile() 
+silent !ctags -R --fields=+ianS --extra=+q 
+endfunction 
+nmap <F12> :call UpdateTagsFile()<CR> 
+
+"Ctrl + F12删除tags文件 
+function! DeleteTagsFile() 
+silent !del /F /Q tags 
+endfunction 
+nmap <C-F12> :call DeleteTagsFile()<CR> 
+
+"ctrl+s保存文件 
+nmap <c-s> :w<CR> 
+imap <c-s> <Esc>:w<CR>a 
+
+"覆盖zen coding的展开键 
+let g:user_zen_expandabbr_key = '<c-e>' 
+let g:use_zen_complete_tag = 1 
+let g:user_zen_settings = { 
+\ 'php' : { 
+\ 'extends' : 'html', 
+\ 'filters' : 'c', 
+\ }, 
+\} 
+
+"javascript语法高亮脚本的设置 
+let g:javascript_enable_domhtmlcss=1 
+
+"vimwiki设置 
+let g:vimwiki_use_mouse = 1 
+let g:vimwiki_CJK_length = 1 
+let g:vimwiki_list = [{'path':'d:/My Dropbox/vimwiki/', 
+\'path_html':'d:/My Dropbox/vimwiki/html/', 
+\'html_header':'d:/My Dropbox/vimwiki/template/header.tpl', 
+\'html_footer':'d:/My Dropbox/vimwiki/template/footer.tpl',} 
+\] 

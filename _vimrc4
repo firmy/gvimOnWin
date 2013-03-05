@@ -1,0 +1,605 @@
+" ========================================================== 
+" File Name: vimrc 
+" Author: StarWing 
+" Version: 0.5 (767) 
+" Last Change: 2010-04-14 19:29:03 
+" Must After Vim 7.0 {{{1 
+if v:version < 700 
+finish 
+endif 
+" }}}1 
+" ========================================================== 
+" Settings {{{1 
+
+" init settings {{{2 
+
+silent! so $VIMRUNTIME/vimrc_example.vim 
+
+set encoding=utf-8 
+scriptencoding utf-8 
+
+if has('win32') && $LANG =~? 'zh_CN' 
+let &rtp = iconv(&rtp, 'cp936', 'utf-8') 
+endif 
+
+if has('eval') 
+let s:cpo_save = &cpo 
+endif 
+set cpo&vim " set cpo-=C cpo-=b 
+
+" generic Settings {{{2 
+
+set ambiwidth=double 
+set bsdir=buffer 
+set complete-=i 
+set completeopt=longest,menu 
+set diffopt+=vertical 
+set display=lastline 
+set fileencodings=ucs-bom,utf-8,cp936,gb18030,latin1 
+set formatoptions+=mB2 
+set helplang=cn 
+set shiftwidth=4 
+set textwidth=70 
+set viminfo+=! 
+set virtualedit=block 
+set wildcharm=<C-Z> 
+set wildmenu 
+
+" titlestring & statusline {{{2 
+
+set titlestring=%f%(\ %m%h%r%)\ -\ StarWing's\ Vim 
+set laststatus=2 
+set statusline= 
+set statusline+=%2*%-3.3n%0*\ " buffer number 
+set statusline+=%f\ " file name 
+set statusline+=%1*%h%m%r%w%0* " flag 
+set statusline+=[ 
+
+if v:version >= 600 
+set statusline+=%{&ft!=''?&ft:'noft'}, " filetype 
+set statusline+=%{&fenc!=''?&fenc:&enc}, " fileencoding 
+endif 
+
+set statusline+=%{&fileformat}] " file format 
+set statusline+=%= " right align 
+"set statusline+=%2*0x%-8B\ " current char 
+set statusline+=0x%-8B\ " current char 
+set statusline+=%-14.(%l,%c%V%)\ %<%P " offset 
+
+if globpath(&rtp, "plugin/vimbuddy.vim") != '' 
+set statusline+=\ %{VimBuddy()} " vim buddy 
+endif 
+
+" helplang {{{2 
+if v:version >= 603 
+set helplang=cn 
+endif 
+
+" diffexpr {{{2 
+if has('eval') 
+set diffexpr=rc:my_diff('diff') 
+
+function! rc:my_diff(cmd) 
+let cmd = [a:cmd, '-a --binary', v:fname_in, v:fname_new] 
+
+if &diffopt =~ 'icase' 
+let cmd[1] .= ' -i' 
+endif 
+if &diffopt =~ 'iwhite' 
+let cmd[1] .= ' -b' 
+endif 
+call writefile(split(system(join(cmd)), "\n"), v:fname_out) 
+endfunction 
+endif 
+
+if has('gui_running') " {{{2 
+set go=eLr co=120 lines=35 
+
+if has('win32') 
+set gfn=Consolas:h10:cANSI 
+exec 'set gfw='.iconv('新宋体', 'utf-8', 'cp936').':h10:cGB2312' 
+else 
+set gfn=Consolas\ 10 gfw=WenQuanYi\ Bitmap\ Song\ 10 
+endif 
+silent! colorscheme kaltex 
+
+else " in terminal {{{2 
+silent! colorscheme kaltex 
+endif " }}}2 
+
+" System specified Settings {{{2 
+
+if has("win32") " {{{3 
+if !isdirectory($VIM.'/swapfiles') 
+let s:dir = $VIM.'/swapfiles' 
+if has('win32') && $LANG =~? 'zh_CN' 
+let s:dir = iconv(s:dir, 'utf-8', 'cp936') 
+endif 
+silent! call mkdir(s:dir, 'p') 
+unlet s:dir 
+endif 
+
+if isdirectory($VIM.'/swapfiles') 
+set backupdir=$VIM/swapfiles 
+set directory=$VIM/swapfiles 
+endif 
+
+if $LANG =~? 'zh_CN' && &encoding !=? "cp936" 
+set termencoding=cp936 
+
+lang mes zh_CN.UTF-8 
+
+set langmenu=zh_CN.UTF-8 
+silent! so $VIMRUNTIME/delmenu.vim 
+silent! so $VIMRUNTIME/menu.vim 
+endif 
+
+elseif has('unix') " {{{3 
+if !isdirectory(expand('~/.vim/swapfiles')) 
+silent! call mkdir('~/.vim/swapfiles', 'p') 
+endif 
+
+if isdirectory(expand('~/.vim/swapfiles')) 
+set backupdir=~/.vim/swapfiles 
+set directory=~/.vim/swapfiles 
+endif 
+
+if &term == 'linux' 
+" lang C 
+endif 
+endif " }}}3 
+
+" }}}2 
+" ---------------------------------------------------------- 
+" Helpers {{{1 
+
+" Environment Variables Setting {{{2 
+if has('eval') 
+
+function! s:globfirst(pattern) " {{{3 
+return simplify(split(glob(a:pattern), '\n', 1)[0]) 
+endfunction " }}}3 
+" $VIMDIR {{{3 
+for dir in split(globpath(&rtp, "plugin/*.vim"), "\<NL>") 
+let $VIMDIR = fnamemodify(dir, ":p:h:h") 
+break 
+endfor 
+
+" $PATH in win32 {{{3 
+if has("win32") 
+let $PATH = $VIM."/vimfiles/tools;".$PATH 
+if isdirectory($VIM.'/../minGW/bin') && $PATH !~ '\cminGW[\\/]bin' 
+let s:mingw_path = s:globfirst($VIM.'/../minGW/') 
+let $PATH = s:mingw_path.'bin;'.$PATH 
+let s:mingw_path = escape(s:mingw_path, ' ') 
+let &path .= ','.s:mingw_path.'include,'.s:mingw_path.'include\**,'. 
+\ s:mingw_path.'lib\gcc\**' 
+unlet s:mingw_path 
+endif 
+if isdirectory($VIM.'/../Python') && $PATH !~ '\cPython' 
+let s:python_path = s:globfirst($VIM.'/../Python/') 
+let $PATH = s:python_path.';'.$PATH 
+if !exists('$PYTHONPATH') 
+let $PYTHONPATH = s:python_path.'Lib;'. 
+\ s:python_path.'Lib/site-packages' 
+endif 
+unlet s:python_path 
+endif 
+endif 
+
+" $DOC and $WORK {{{3 
+if has('win32') 
+let s:cur_root = fnamemodify($VIM, ':p')[0] 
+let s:spec_path = [['$WORK', '..\..\..\..\Work'], 
+\ ['$DOC', nr2char(s:cur_root).':\Document'], 
+\ ['$WORK', nr2char(s:cur_root).':\Work']] 
+for i in range(char2nr('D'), char2nr('Z')) 
+let s:spec_path += [['$DOC', nr2char(i).':\Document'], 
+\ ['$WORK', nr2char(i).':\Work']] 
+endfor 
+unlet s:cur_root 
+else 
+let s:spec_path = [['$DOC', '~/Document'], 
+\ ['$WORK', '~/Work']] 
+endif 
+
+for [var, path] in s:spec_path 
+if isdirectory(glob(path)) && !exists(var) 
+exec 'let '.var.'="'.escape(path,'\"').'"' 
+endif 
+endfor 
+unlet s:spec_path 
+
+" $PRJDIR {{{3 
+
+for dir in ['~', $VIM, $VIM.'/..', $WORK] 
+for name in ['prj', 'Project', 'Code'] 
+if isdirectory(expand(dir."/".name)) 
+let $PRJDIR = s:globfirst(dir."/".name) 
+break 
+endif 
+endfor 
+endfor 
+
+if !exists('$PRJDIR') && exists('$WORK') 
+let $PRJDIR = $WORK 
+endif 
+
+if exists('$PRJDIR') && argc() == 0 
+silent! cd $PRJDIR 
+endif " }}}3 
+
+endif " }}}2 
+" Generic autocmds {{{2 
+if has('autocmd') 
+augroup vimrc_autocmds 
+function! s:vimrc_write() " {{{3 
+let time = strftime("%Y-%m-%d %H:%M:%S") 
+let pos = winsaveview() 
+
+$|if search('\c^" Vimrc History', 'bW') 
+call append(line('.'), '" Write at '.time) 
+endif 
+
+1|if search('\c^"\s*Last Change:', 'W') 
+call setline(line('.'), 
+\ matchstr(getline('.'), '\c^"\s*Last Change:\s*').time) 
+endif 
+
+1|if search('\c^"\s*Version:', 'W') 
+let pat = '^"\s*[Vv]ersion:\v.{-}\ze%(\s*\((\d+)\))=$' 
+let pv = matchlist(getline('.'), pat) 
+if empty(pv[1]) 
+call setline('.', getline('.').' (1)') 
+else 
+call setline('.', pv[0].' ('.(str2nr(pv[1], 10)+1).')') 
+endif 
+endif 
+
+call winrestview(pos) 
+endfunction 
+" }}}3 
+
+au BufFilePost * filetype detect|redraw 
+au BufWritePre $MYVIMRC silent call s:vimrc_write() 
+au BufWritePre * let &backup = (getfsize(expand('%')) > 500000) 
+au BufNewFile,BufRead *.vba set noml 
+au FileType perl,python,ruby set sw=4 ts=8 et sta nu fdc=2 fo-=t 
+au FileType python set fdm=indent 
+au FileType html set fo-=t 
+
+if has("cscope") 
+au VimLeave * cs kill -1 
+endif 
+
+augroup END 
+endif 
+" Generic commands {{{2 
+if has("eval") 
+
+" Q for quit all {{{3 
+command! -bar Q qa! 
+" EX, EV, EF, ES, EP {{{3 
+
+function! s:open(fname) 
+let exec = has('win32') ? '!start explorer ' : '!nautilus ' 
+let fname = matchstr(glob(a:fname), '^\v.{-}\ze(\n|$)') 
+
+if !isdirectory(fname) 
+if has('win32') 
+exec exec.'/select,'.fname 
+else 
+exec exec.fnamemodify(fname, ':h') 
+endif 
+else 
+exec exec.fname 
+endif 
+
+call feedkeys("\n", 't') 
+endfunction 
+
+command! -nargs=* -complete=file EX call s:open(<q-args>) 
+command! EV EX $VIM 
+command! EF EX %:p 
+
+if exists('$VIMDIR') 
+command! ES EX $VIMDIR 
+endif 
+if exists('$PRJDIR') 
+command! EP EX $PRJDIR 
+endif 
+
+" DarkRoom {{{3 
+
+if has('win32') && executable('vimtweak.dll') 
+let s:tweak_SetAlpha = 255 
+let s:tweak_Caption = 1 
+let s:tweak_Maximize = 0 
+let s:tweak_TopMost = 0 
+let s:tweak_initialize = 0 
+
+function! s:tweak(method, argv) 
+if !s:tweak_initialize 
+" a bug in Vista 
+if system('ver') =~ ' 6.' 
+silent! libcallnr('vimtweak.dll', 'EnableTopMost', 0) 
+endif 
+
+let s:tweak_initialize = 1 
+endif 
+
+let s:tweak_{a:method} = a:argv 
+return libcallnr('vimtweak.dll', (a:method == 'SetAlpha' ? '' : 'Enable'). 
+\ a:method, a:argv) 
+endfunction 
+
+command! -bar -nargs=1 -count=0 VimTweak call s:tweak(<q-args>, <count>) 
+command! -bang -bar Darkroom SwitchCaption | SwitchMaximize 
+for var in ['Caption', 'Maximize', 'TopMost'] 
+exec 'com! -bar Switch'.var.' exec !s:tweak_'.var. 
+\ '."VimTweak '.var.'"' 
+endfor 
+command! -bar SwitchAlpha if s:tweak_SetAlpha == 255|200SetAlpha 
+\ |else|255SetAlpha|endif 
+command! -bar -count=255 SetAlpha <count>VimTweak SetAlpha 
+map <F10> :<C-U>SwitchMaximize<CR> 
+imap <F10> <ESC><F10>a 
+map <F11> :<C-U>SwitchAlpha<CR> 
+imap <F11> <ESC><F11>a 
+map <F12> :<C-U>Darkroom!<CR> 
+imap <F12> <ESC><F12>a 
+endif 
+
+" AddTo, SoScript {{{3 
+if exists("$VIMDIR") 
+
+command! -nargs=1 -complete=customlist,VimfilesDirComplete 
+\ AddTo call rename(expand('%'), 
+\ $VIMDIR.'/<args>/'.expand('%:t')) | checkt 
+let Script_folder = 'script' 
+command! -nargs=1 -complete=customlist,ScriptDirFileComplete 
+\ SoScript exec 'so $VIMDIR/'.Script_folder.'/<args>' 
+
+function! VimfilesDirComplete(ArgLead, ...) 
+return map(filter(split(globpath($VIMDIR, 
+\ escape(a:ArgLead, '?*[').'*'), "\n"), 
+\ 'isdirectory(v:val)'), 
+\ 'fnamemodify(v:val, ":t")') 
+endfunction 
+
+function! ScriptDirFileComplete(ArgLead, ...) 
+return map(split(globpath($VIMDIR.'/scripts', 
+\ escape(a:ArgLead, '?*[').'*'), "\n"), 
+\ 'fnamemodify(v:val, ":t")') 
+endfunction 
+endif 
+" Font Size {{{3 
+
+let s:gf_pat = has('win32') ? 'h\zs\d\+' : '\d\+$' 
+command! -bar -count=10 FSIZE let &gfn = substitute(&gfn, s:gf_pat, 
+\ <count>, '') | let &gfw = substitute(&gfw, s:gf_pat, 
+\ <count>, '') 
+" }}}3 
+
+endif 
+
+" Generic maps {{{2 
+
+" explorer invoke {{{3 
+if exists(':Explorer') == 2 
+nmap <leader>ex :EX<CR> 
+vmap <leader>ex "ey:EX <C-R>e<CR> 
+map <leader>ev :<C-U>EV<CR> 
+map <leader>es :<C-U>ES<CR> 
+map <leader>ep :<C-U>EP<CR> 
+map <leader>es :<C-U>ES<CR> 
+endif 
+
+" cmdline edit key, emacs style {{{3 
+
+cnoremap <C-A> <Home> 
+cnoremap <C-E> <End> 
+cnoremap <C-F> <Right> 
+cnoremap <C-B> <Left> 
+cnoremap <C-N> <Down> 
+cnoremap <C-P> <Up> 
+cnoremap <M-F> <S-Right> 
+cnoremap <M-B> <S-Left> 
+
+" filetype settings {{{3 
+map <leader>f+ :<C-U>setf cpp<CR> 
+map <leader>fc :<C-U>setf c<CR> 
+map <leader>fd :<C-U>setf dot<CR> 
+map <leader>fj :<C-U>setf java<CR> 
+map <leader>fP :<C-U>setf perl<CR> 
+map <leader>fp :<C-U>setf python<CR> 
+map <leader>fT :<C-U>setf tex<CR> 
+map <leader>ft :<C-U>setf text<CR> 
+map <leader>fv :<C-U>setf vim<CR> 
+
+" run current line {{{3 
+nmap <leader>rc :exec getline('.')[col('.')-1:]<CR> 
+vmap <leader>rc y:exec @"<CR> 
+nmap <leader>ec :echo eval(getline('.'))[col('.')-1:]<CR> 
+vmap <leader>ec y:echo eval(@")<CR> 
+
+" syntax stack {{{3 
+nmap <leader>ss :for id in synstack(line('.'),col('.')) 
+\\|echo synIDattr(id, "name") 
+\\|endfor<CR> 
+
+" vimrc edit {{{3 
+map <leader>re :drop $MYVIMRC<CR> 
+map <leader>rr :so $MYVIMRC<CR> 
+
+" clipboard operations {{{3 
+if has('eval') 
+for op in ['y', 'Y', 'p', 'P'] 
+exec 'nmap <leader>c'.op.' "+'.op 
+exec 'vmap <leader>c'.op.' "+'.op.'gv' 
+endfor 
+
+" inner buffer 
+function! s:inner_buf() 
+let line1 = nextnonblank(1) 
+if line1 == 0 
+" the buffer is blank, select it like with aa 
+norm! ggVG 
+return 
+endif 
+exec "norm!" line1."ggV". prevnonblank("$")."G" 
+endfunc 
+nor ii :<C-U>call <SID>inner_buf()<CR> 
+nun ii| sunm ii 
+
+" all buffer 
+nor aa :<C-U>norm! ggVG<CR> 
+nun aa| sunm aa 
+
+" get Global 
+nor gG :norm! ggVG<CR> 
+sunm gG 
+" Build buffer with zip 
+nmap zB gGzp 
+" get text zipped 
+nmap gz zyaa`` 
+
+" Zip Yank and Put 
+map zy <leader>cy 
+map zY <leader>cY 
+map zp <leader>cp 
+map zP <leader>cP 
+
+" set Y operator tp y$ 
+map Y y$ 
+endif 
+
+" indent {{{3 
+xmap > >gv 
+xmap < <gv 
+map g= gg=G 
+
+" quick complete (against supertab) {{{3 
+
+inor <m-n> <c-n> 
+inor <m-p> <c-p> 
+
+" window moving {{{3 
+map <C-j> <C-W>j 
+map <C-k> <C-W>k 
+map <C-h> <C-W>h 
+map <C-l> <C-W>l 
+map <C-,> <C-W>< 
+map <C-.> <C-W>> 
+map <C--> <C-W>- 
+map <C-+> <C-W>+ 
+map <C-=> <C-W>= 
+
+" Function Key maps {{{3 
+
+" f1: show the wildmenu {{{4 
+map <F1> :<C-U>emenu <C-Z> 
+imap <F1> <ESC><F1> 
+
+" in cmode, it means print time 
+cnoremap <f1> <C-R>=escape(strftime("%Y-%m-%d %H:%M:%S"), '\ ')<CR> 
+
+" f4: clear hlsearch and qf/loc window {{{4 
+map <F4> :<C-U>noh\|pcl\|ccl\|lcl<CR> 
+imap <F4> <ESC><F4>a 
+
+" }}}4 
+
+" }}}3 
+
+" }}}2 
+" ---------------------------------------------------------- 
+" plugin settings {{{1 
+
+" calendar {{{2 
+
+for dir in ['~', $VIM, $VIM.'/..', $PRJDIR, $PRJDIR.'/..'] 
+if isdirectory(dir.'/diary') 
+let g:calendar_diary = s:globfirst(dir.'/diary') 
+break 
+
+elseif isdirectory(dir.'/Diary') 
+let g:calendar_diary = s:globfirst(dir.'/Diary') 
+break 
+endif 
+endfor 
+
+let g:calendar_focus_today = 1 
+
+nmap <leader>da <leader>cal<CR>Go<CR><C-R>=strftime("%Y-%m-%d %H:%M:%S")<CR><CR> 
+nmap <leader>DA <leader>caL<CR>Go<CR><C-R>=strftime("%Y-%m-%d %H:%M:%S")<CR><CR> 
+vmap <leader>da "dy<leader>da<BS> - 摘要：<CR><ESC>"dP 
+vmap <leader>DA "dy<leader>DA<BS> - 摘要：<CR><ESC>"dP 
+
+" minibufexpl {{{2 
+
+let g:miniBufExplMapCTabSwitchBufs = 1 
+let g:miniBufExplMapWindowNavVim = 1 
+let g:miniBufExplorerMoreThanOne = 2 
+
+nmap <leader>on :on<CR><leader>mbe 
+vmap <leader>on <ESC><leader>on 
+
+" mru {{{2 
+
+let g:MRU_Check_File = 1 
+let g:MRU_Exclude_Files = '\c\v(\\|\/)%(Temp|Tmp)\1' 
+if has('win32') 
+let g:MRU_File = expand($VIM.'/_vim_mru_files') 
+else 
+let g:MRU_File = expand('~/.vim/_vim_mru_files') 
+endif 
+let g:MRU_Max_Entries = 80 
+
+menutrans Recent\ Files 最近使用的文件(&R) 
+menutrans Refresh\ list 刷新列表(&R) 
+
+" omnicppcomplete {{{2 
+
+let g:OmniCpp_GlobalScopeSearch = 1 " 0 or 1 
+let g:OmniCpp_NamespaceSearch = 1 " 0 , 1 or 2 
+let g:OmniCpp_DisplayMode = 1 
+let g:OmniCpp_ShowScopeInAbbr = 0 
+let g:OmniCpp_ShowPrototypeInAbbr = 1 
+let g:OmniCpp_ShowAccess = 1 
+let g:OmniCpp_MayCompleteDot = 1 
+let g:OmniCpp_MayCompleteArrow = 1 
+let g:OmniCpp_MayCompleteScope = 1 
+
+" supertab {{{2 
+
+let g:SuperTabRetainCompletionType = 2 
+let g:SuperTabDefaultCompletionType = "context" 
+let g:SuperTabContextDefaultCompletionType = "<c-x><c-p>" 
+
+" taglist {{{2 
+
+if !executable("ctags") 
+let g:loaded_taglist = 'no' 
+else 
+let g:Tlist_Show_One_File = 1 
+let g:Tlist_Exit_OnlyWindow = 1 
+endif 
+
+" winmanager {{{2 
+
+let g:winManagerWindowLayout = 'FileExplorer|TagList' 
+
+map <leader>wm :<c-u>WMToggle<CR> 
+map <F2> <leader>wm 
+imap <F2> <ESC><leader>wm 
+
+" }}}2 
+
+if exists('s:cpo_save') 
+let &cpo = s:cpo_save 
+unlet s:cpo_save 
+endif 
+
+" }}}1 
+" vim: ft=vim ff=unix fdm=marker ts=4 sw=4 et sta nu 

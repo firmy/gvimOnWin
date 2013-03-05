@@ -1,0 +1,251 @@
+" Use Vim settings, rather than Vi settings (much better!).
+" This must be first, because it changes other options as a side effect
+set nocompatible
+set tags=tags
+set autochdir
+if(has("win32") || has("win95") || has("win64") || has("win16")) 
+    let g:iswindows=1
+else
+    let g:iswindows=0
+endif
+source $VIMRUNTIME/vimrc_example.vim
+source $VIMRUNTIME/mswin.vim
+behave mswin
+set diffexpr=MyDiff()
+function MyDiff()
+  let opt = '-a --binary '
+  if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+  if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+  let arg1 = v:fname_in
+  if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+  let arg2 = v:fname_new
+  if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+  let arg3 = v:fname_out
+  if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+  let eq = ''
+  if $VIMRUNTIME =~ ' '
+    if &sh =~ '\<cmd'
+      let cmd = '""' . $VIMRUNTIME . '\diff"'
+      let eq = '"'
+    else
+      let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+    endif
+  else
+    let cmd = $VIMRUNTIME . '\diff'
+  endif
+  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3 . eq
+endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Maintainer:  Wangxinyi <wxyskycn@gmail.com> 
+" Version:     0.1 
+" 
+" Sections:    
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"  common configure
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+"set vb t_vb=                              "disable visual and sound beep
+filetype on
+set fileencoding=utf-8
+set fileencodings=ucs-bom,gb18030,utf-8,default
+set nocompatible                          "Use vim advance setting
+set tabstop=2                             "Use 2 spaces for tabs
+set shiftwidth=3                          "2 psaces for autoindent
+set expandtab                             "Use space instaead of tabs
+set incsearch                             "incremental search
+set hlsearch                              "Highlight search hits
+set showcmd                               "Show panding commands
+set showmode                              "Show current mode down the bottom
+set cmdheight=2                           "lines for command window
+set laststatus=2                          "Always show status line
+set backspace=indent,eol,start            "Backspace over everyting
+set history=50                            "Save at most 50 commands
+
+set ruler                                 "show ruler
+set showmatch                             "Display matching paren
+set matchtime=2                           "Be breif when displaying the match
+set nobackup                              "No backups
+"set visualbell                            "Use visual bell
+set lazyredraw                            "Don't redraw on macro execute
+set noerrorbells                          "Don't make noise
+set autoread                              "Re-read if modify
+set diffopt=filler,iwhite                 "Diff options
+set nostartofline                         "Keep cursor column when moving
+set number                                "Show number of line on left
+set helplang=cn,en                        "Language of help
+set enc=cp936                             "cp936 in WinXp
+set termencoding=utf-8 
+set clipboard=unnamed                     "Let adopt to windows copy/plaste
+set ignorecase
+set noswapfile
+set si
+set softtabstop=2
+set cindent
+set nowrap
+set number
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"  Options for Graphic Version of VIM 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+set guioptions-=T                       "No Toolbar
+set guioptions-=L                       "No left hand scrollbars
+"set guioptions-=r                       "No right hand scrollbars
+set guioptions-=m                       "Mo menu bar
+set guioptions+=b                     
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"  Color schema and font 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+colorscheme desert
+set guifont=Bitstream_Vera_Sans_Mono:h9:cANSI
+"set guifont=Bitstream_Vera_Sans_Mono
+set et
+
+if has("win32")
+  set guifont=Courier_New:h10:cANSI
+  "set guifontwide=YaHei_Consolas_Hybrid:h10
+endif
+
+"Highlight curent
+if has("gui_running")
+  set cursorline
+  hi cursorline guibg=#333333
+  hi CursorColumn  guibg=#333333
+endif
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"  Auto commands 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+syntax on
+set browsedir=buffer
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"  Other 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+nmap <leader>w :w!<cr>
+nmap <leader>f :find<cr>
+
+"Tab configuration
+map <leader>tn :tabnew <cr>
+map <leader>te :tabedit
+map <leader>tc :tabclose<cr>
+map <leader>tm :tabmove
+
+"Moving fast to front, back and 2 sides :)
+imap <m-$> <esc>$a
+imap <m-0> <esc>0i
+imap <D-$> <esc>$a
+imap <D-0> <esc>0i
+
+map <leader>pwd  :pwd<cr>
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"  plug configure 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Nero_tree
+let NERDChristmasTree=1 
+"let NEROTreeAutoCenter=3
+let NERDTreeChDirMode=0
+let NERDTreeWinSize=20
+nnoremap <silent> <C-F1> :NERDTreeToggle<cr> 
+
+" miniBufExplMap
+let g:miniBufExplMapCTabSwitchBufs=1
+let g:miniBufExplMapWindowsNavVim=1
+let g:miniBufExplMapWindowNavArrows=1
+
+" Taglist
+let Tlist_Ctags_Cmd= 'D:/usr/Vim/vim73/ctags.exe'
+let Tlist_Auto_Highlight_Tag=1
+let Tlist_Auto_Open=1
+let Tlist_Auto_Update=1
+let Tlist_Show_Menu=1
+let Tlist_Use_Right_Window=1
+let Tlist_WinWidth=20
+nnoremap <silent> <C-F2> :TlistToggle<CR>
+map <F12> :call Do_CsTag()<CR>
+nmap <C-@>s :cs find s <C-R>=expand("<cword>")<CR><CR>:copen<CR>
+nmap <C-@>g :cs find g <C-R>=expand("<cword>")<CR><CR>
+nmap <C-@>c :cs find c <C-R>=expand("<cword>")<CR><CR>:copen<CR>
+nmap <C-@>t :cs find t <C-R>=expand("<cword>")<CR><CR>:copen<CR>
+nmap <C-@>e :cs find e <C-R>=expand("<cword>")<CR><CR>:copen<CR>
+nmap <C-@>f :cs find f <C-R>=expand("<cfile>")<CR><CR>:copen<CR>
+nmap <C-@>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>:copen<CR>
+nmap <C-@>d :cs find d <C-R>=expand("<cword>")<CR><CR>:copen<CR>
+
+set tags=tags
+set autochdir
+
+" MinBufexpl
+map <silent> <F2>  :TMiniBufExplorer<CR> 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"  language setting 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"if &filetype=~'python'
+nnoremap <C-F5> :!python %<CR>
+"endif
+echo &filetype
+
+
+" functions
+
+function Do_CsTag()
+    let dir = getcwd()
+    if filereadable("tags")
+        if(g:iswindows==1)
+            let tagsdeleted=delete(dir."\\"."tags")
+        else
+            let tagsdeleted=delete("./"."tags")
+        endif
+        if(tagsdeleted!=0)
+            echohl WarningMsg | echo "Fail to do tags! I cannot delete the tags" | echohl None
+            return
+        endif
+    endif
+    if has("cscope")
+        silent! execute "cs kill -1"
+    endif
+    if filereadable("cscope.files")
+        if(g:iswindows==1)
+            let csfilesdeleted=delete(dir."\\"."cscope.files")
+        else
+            let csfilesdeleted=delete("./"."cscope.files")
+        endif
+        if(csfilesdeleted!=0)
+            echohl WarningMsg | echo "Fail to do cscope! I cannot delete the cscope.files" | echohl None
+            return
+        endif
+    endif
+    if filereadable("cscope.out")
+        if(g:iswindows==1)
+            let csoutdeleted=delete(dir."\\"."cscope.out")
+        else
+            let csoutdeleted=delete("./"."cscope.out")
+        endif
+        if(csoutdeleted!=0)
+            echohl WarningMsg | echo "Fail to do cscope! I cannot delete the cscope.out" | echohl None
+            return
+        endif
+    endif
+    if(executable('ctags'))
+        "silent! execute "!ctags -R --c-types=+p --fields=+S *"
+        silent! execute "!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q ."
+    endif
+    if(executable('cscope') && has("cscope") )
+        if(g:iswindows!=1)
+            silent! execute "!find . -name '*.h' -o -name '*.c' -o -name '*.cpp' -o -name '*.java' -o -name '*.cs' > cscope.files"
+        else
+            silent! execute "!dir /s/b *.c,*.cpp,*.h,*.java,*.cs >> cscope.files"
+        endif
+        silent! execute "!cscope -b"
+        execute "normal :"
+        if filereadable("cscope.out")
+            execute "cs add cscope.out"
+        endif
+    endif
+endfunction
