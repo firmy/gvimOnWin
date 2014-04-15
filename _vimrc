@@ -1,6 +1,4 @@
-﻿
-
-" disable VI's compatible mode..
+﻿" disable VI's compatible mode..
 set nocompatible
  
 set fileencodings=utf-8,gbk,default,latin1
@@ -34,7 +32,7 @@ nmap <F4> :AuthorInfoDetect<cr>
 
 
 "设定 windows 下 gvim 启动时最大化
-"autocmd GUIEnter * simalt ~x
+autocmd GUIEnter * simalt ~x
 
 
 
@@ -59,7 +57,7 @@ set expandtab
 "set noignorecase
 
 "设置GVIM默认目录
-lcd e:\m8_code\
+lcd f:\wwwroot\
 "设定文件浏览器目录为当前目录
 set bsdir=buffer
 "自动切换目录
@@ -82,12 +80,12 @@ set showmatch
  
 " Basic editing options
 set expandtab
-set shiftwidth=2
+set shiftwidth=4
  
-au FileType html,python,vim,javascript setl shiftwidth=2
-au FileType html,python,vim,javascript setl tabstop=2
-au FileType java,php setl shiftwidth=4
-au FileType java,php setl tabstop=4
+au FileType html,python,vim,javascript,js setl shiftwidth=4
+au FileType html,python,vim,javascript,js setl tabstop=4
+au FileType java,php,js setl shiftwidth=4
+au FileType java,php,js setl tabstop=4
  
 set smarttab
 set lbr
@@ -173,7 +171,7 @@ set tags=tags;
 set autochdir
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " taglist
-let Tlist_Ctags_Cmd =  'D:\Program Files (x86)\Vim\ctags\ctags.exe'
+"let Tlist_Ctags_Cmd =  'D:\Program Files (x86)\Vim\ctags\ctags.exe'
 let Tlist_Auto_Highlight_Tag = 1  
 let Tlist_Auto_Open = 1
 let Tlist_Auto_Update = 1
@@ -204,17 +202,14 @@ let tlist_php_settings = 'php;c:class;i:interfaces;d:constant;f:function'
 
 " autoload _vimrc
 autocmd! bufwritepost _vimrc source %
-
-""""""""""""""""""""""""""""""
-" lookupfile setting
-""""""""""""""""""""""""""""""
-let g:LookupFile_MinPatLength = 2               "最少输入2个字符才开始查找
-let g:LookupFile_PreserveLastPattern = 0        "不保存上次查找的字符串
-let g:LookupFile_PreservePatternHistory = 1     "保存查找历史
-let g:LookupFile_AlwaysAcceptFirst = 1          "回车打开第一个匹配项目
-let g:LookupFile_AllowNewFiles = 0              "不允许创建不存在的文件
-if filereadable("./filenametags")                "设置tag文件的名字
-let g:LookupFile_TagExpr = '"./filenametags"'
+                                            " lookupfile setting
+let g:LookupFile_MinPatLength           = 2 " 最少输入2个字符才开始查找
+let g:LookupFile_PreserveLastPattern    = 0 " 不保存上次查找的字符串
+let g:LookupFile_PreservePatternHistory = 1 " 保存查找历史
+let g:LookupFile_AlwaysAcceptFirst      = 1 " 回车打开第一个匹配项目
+let g:LookupFile_AllowNewFiles          = 0 " 不允许创建不存在的文件
+if filereadable(                            " ./filenametags     " ) " 设置tag文件的名字
+let g:LookupFile_TagExpr = '                " ./filenametags     " '
 endif
 "映射LookupFile为,lk
 nmap <silent> <leader>lk :LUTags<cr>
@@ -225,7 +220,7 @@ nmap <silent> <leader>lw :LUWalk<cr>
 
 
 
-let g:winManagerWindowLayout='FileExplorer|TagList'
+"let g:winManagerWindowLayout='FileExplorer|TagList'
 nmap wm :WMToggle<cr>
 let g:miniBufExplMapWindowNavVim = 1
 let g:miniBufExplorerMoreThanOne=0
@@ -236,10 +231,10 @@ let g:miniBufExplMapWindowNavArrows=1
 nnoremap <silent> <F12> :A<CR>
 nnoremap <silent> <F3> :Grep<CR>
 
-let g:DoxygenToolkit_authorName="david, david19842003@gmail.com"
-let s:licenseTag = "Copyright(C)\<enter>"
-let s:licenseTag = s:licenseTag . "For free\<enter>"
-let s:licenseTag = s:licenseTag . "All right reserved\<enter>"
-let g:DoxygenToolkit_licenseTag = s:licenseTag
-let g:DoxygenToolkit_briefTag_funcName="yes"
-let g:doxygen_enhanced_color=1
+map fg :Dox<cr>
+let g:DoxygenToolkit_briefTag_pre = "@Desc: "
+let g:DoxygenToolkit_paramTag_pre = "@Param "
+let g:DoxygenToolkit_returnTag    = "@Returns "
+let g:DoxygenToolkit_blockHeader  = "----------------------------------------------------"
+let g:DoxygenToolkit_blockFooter  = "----------------------------------------------------"
+let g:DoxygenToolkit_authorName   = "Firmy"
