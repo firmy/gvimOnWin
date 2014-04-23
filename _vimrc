@@ -1,4 +1,12 @@
-﻿" disable VI's compatible mode..
+﻿"/**
+" * @file _vimrc
+" * @Desc: 
+" * @author Firmy
+" * @version 
+" * @date 2014-04-22
+" */
+
+" disable VI's compatible mode..
 set nocompatible
  
 set fileencodings=utf-8,gbk,default,latin1
@@ -10,9 +18,9 @@ set helplang=cn
 
 "set gui options
 if has("gui_running")
- set guifont=Consolas:h9
- " set color schema
- colorscheme desert
+set guifont=Consolas:h9
+" set color schema
+colorscheme desert
 
 endif
 
